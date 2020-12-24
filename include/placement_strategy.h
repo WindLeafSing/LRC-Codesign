@@ -135,35 +135,38 @@ public:
                 if ((i + 1) * stride <= m_k)
                 {
                     std::set<int> s(datanode.begin() + i * stride, datanode.begin() + (i + 1) * stride);
-                    if(!s.empty()) LocalClusterMap.insert(std::make_pair(i, s));
+                    if (!s.empty())
+                        LocalClusterMap.insert(std::make_pair(i, s));
                 }
                 else
                 {
                     std::set<int> s(datanode.begin() + i * stride, datanode.end());
-                    if(!s.empty())  LocalClusterMap.insert(std::make_pair(i, s));
+                    if (!s.empty())
+                        LocalClusterMap.insert(std::make_pair(i, s));
                 }
             }
         }
         int localPindex = 0;
         int localdcounter = (r1)*m_local_cluster;
-        int startdindex = 1 * (locality - 1) - r2+1;
+        int startdindex = 1 * (locality - 1) - r2 + 1;
         if (0 != m_residue_cluster)
         {
             for (int i = 0; i < m_residue_cluster + m_residue_overflow_cluster /* 0 or 1*/; ++i)
             {
 
-                if (((localdcounter + (r2-1)* local_groups_per_residue_cluster)) <= m_k)
+                if (((localdcounter + (r2 - 1) * local_groups_per_residue_cluster)) <= m_k)
                 {
                     //pick out residue into a set
                     std::set<int> s;
                     for (int j = 0; j < local_groups_per_residue_cluster; ++j)
                     {
-                        for (int k = 0; k < (r2-1); ++k)
+                        for (int k = 0; k < (r2 - 1); ++k)
                             s.insert(datanode[startdindex + k]);
                         startdindex += locality - 1;
                     }
-                    if(!s.empty()) ResidueClusterMap.insert(std::make_pair(i, s));
-                    localdcounter += (r2-1)* local_groups_per_residue_cluster;
+                    if (!s.empty())
+                        ResidueClusterMap.insert(std::make_pair(i, s));
+                    localdcounter += (r2 - 1) * local_groups_per_residue_cluster;
                 }
                 else
                 {
@@ -179,7 +182,7 @@ public:
         }
         else
         {
-            for (int i = 0; i < m_local_cluster+m_local_cluster_overflow; ++i)
+            for (int i = 0; i < m_local_cluster + m_local_cluster_overflow; ++i)
             {
                 for (int j = 0; localPindex < m_l && j < s1; ++j)
                     LocalClusterMap[i].insert(localPnode[localPindex++]);
@@ -216,6 +219,36 @@ public:
             std::for_each(p.second.cbegin(), p.second.cend(), [](int e) { std::cout << e << " "; });
             std::cout << std::endl;
         }
+    }
+
+    int GetLocalClusterNum() const
+    {
+        return LocalClusterMap.size();
+    }
+
+    int GetResidueClusterNum() const
+    {
+        return LocalClusterMap.size();
+    }
+
+    int GetGlobalClusterNum() const
+    {
+        return LocalClusterMap.size();
+    }
+
+    std::map<int, std::set<int>> GetLocalClusterInfo() const
+    {
+        return LocalClusterMap;
+    }
+
+    std::map<int, std::set<int>> GetResidueClusterInfo() const
+    {
+        return ResidueClusterMap;
+    }
+
+    std::map<int, std::set<int>> GetGlobalClusterInfo() const
+    {
+        return GlobalClusterMap;
     }
 
 private:
