@@ -87,9 +87,10 @@ int main(int, char **)
         cost[0][start++] = {0, globalmap[i].size()};
     }
 
+    int max_datanode_per_cluster = *std::max_element(datanode_distribution.cbegin(),datanode_distribution.cend());
     std::fstream fs("simulation_result",std::ios::out);
     fs<<"for fixed first stripe layout\n";
-    fs<<"given second stripe layout and following its minimum typeI typeII costs:\n";
+    fs<<"given second stripe layout and following its typeII costs:\n";
     fs.flush();
     //random distributed second stripe
     //generate random cluster index , last one is global cluster
@@ -97,13 +98,15 @@ int main(int, char **)
     {
         auto [clusterindex, flag] = comb.Generate();
         std::sort(clusterindex.begin(), clusterindex.end());
+        fs << "choose these cluster : \n";
+        std::for_each(clusterindex.cbegin(),clusterindex.cend(),
+        [&fs](int e){ fs << e << " ";});
+        fs<<"\n";fs.flush();
         do
         {
             //reset cost[1] which indicates second stripe
             cost[1].assign(c, {0, 0});
 
-            int curmax = -1;
-            int max_datanode_cluster_index = -1;
             int type_II_migration_num = 0;
             int index = 0;
             for (int i = 0; i < required_local_cluster; ++i)
@@ -115,11 +118,7 @@ int main(int, char **)
                 }
                 cost[1][clusterindex[index]] = {datanode_distribution[index],
                                                 localmap[i].size() - datanode_distribution[index]};
-                if (cost[1][clusterindex[index]].first + cost[0][clusterindex[index]].first > curmax)
-                {
-                    max_datanode_cluster_index = clusterindex[index];
-                    curmax = cost[1][clusterindex[index]].first + cost[0][clusterindex[index]].first;
-                }
+                
                 index++;
             }
 
@@ -132,11 +131,7 @@ int main(int, char **)
                 }
                 cost[1][clusterindex[index]] = {datanode_distribution[index],
                                                 residuemap[i].size() - datanode_distribution[index]};
-                if (cost[1][clusterindex[index]].first + cost[0][clusterindex[index]].first > curmax)
-                {
-                    max_datanode_cluster_index = clusterindex[index];
-                    curmax = cost[1][clusterindex[index]].first + cost[0][clusterindex[index]].first;
-                }
+                
                 index++;
             }
 
@@ -145,7 +140,9 @@ int main(int, char **)
                 cost[1][clusterindex[index]] = {0, globalmap[i].size()};
                 index++;
             }
-            int type_I_cost = 2 * k - curmax;
+            //always reencoding merged stripe which is doubled
+            int type_I_cost = 2 * k ;
+            
             int type_II_cost = type_II_migration_num;
 
             //debug
@@ -157,13 +154,13 @@ int main(int, char **)
             std::cout << std::endl;
             fs<<"\n";
 
-            std::cout <<"then the minimum type_I and type_II cost are : " <<std::endl;
-            std::cout << type_I_cost <<" and " <<type_II_cost << std::endl;
+            std::cout <<"then the type_II cost is : " <<std::endl;
+            std::cout << type_II_cost << std::endl;
             //
            
             // transition_cost_I_II.emplace_back(std::make_pair(type_I_cost, type_II_cost)); //this is the minimum for this randomly chosen clusters
             
-            fs<<type_I_cost<<"-"<<type_II_cost<<"\n";
+            fs<<type_II_cost<<"\n";
             fs.flush();
         } while (std::next_permutation(clusterindex.begin(), clusterindex.end()));
         if(flag) break;
