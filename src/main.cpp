@@ -31,7 +31,7 @@ int main(int, char **)
 */
     int k, l, g, c;
     std::cout << "input your k-l-g-c:" << std::endl;
-    sts::cin >> k >> l >> g >> c;
+    std::cin >> k >> l >> g >> c;
     assert(k%l==0);
     assert(k%l==g);
     node_dispatcher node_dis(k, l, g, c);
