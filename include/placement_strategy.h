@@ -228,12 +228,12 @@ public:
 
     int GetResidueClusterNum() const
     {
-        return LocalClusterMap.size();
+        return ResidueClusterMap.size();
     }
 
     int GetGlobalClusterNum() const
     {
-        return LocalClusterMap.size();
+        return GlobalClusterMap.size();
     }
 
     std::map<int, std::set<int>> GetLocalClusterInfo() const

@@ -33,18 +33,19 @@ int main(int, char **)
     std::cout << "input your k-l-g-c:" << std::endl;
     std::cin >> k >> l >> g >> c;
     assert(k%l==0);
-    assert(k%l==g);
+    assert(k/l==g);
     node_dispatcher node_dis(k, l, g, c);
     int required_local_cluster = node_dis.GetLocalClusterNum();
     int required_residue_cluster = node_dis.GetResidueClusterNum();
     int required_global_cluster = node_dis.GetGlobalClusterNum();
+    node_dis.ShowLayout();
 
     auto localmap = node_dis.GetLocalClusterInfo();
     auto residuemap = node_dis.GetResidueClusterInfo();
     auto globalmap = node_dis.GetGlobalClusterInfo();
 
     //since considering c = 2*required_cluster_num is enough
-    c = std::min(c, 2 * required_local_cluster + required_residue_cluster + required_global_cluster);
+    c = std::min(c, 2 * (required_local_cluster + required_residue_cluster + required_global_cluster));
 
     //suppose existed stripe (0,1,2,...,n) where global cluster is n
     std::vector<std::vector<std::pair<int, int>>> cost(2 /* 2 stripe */, std::vector<std::pair<int, int>>(c, {0, 0}));
@@ -140,6 +141,18 @@ int main(int, char **)
             }
             int type_I_cost = 2 * k - curmax;
             int type_II_cost = type_II_migration_num;
+
+            //debug
+            std::cout << "for fixed first stripe layout : "<<std::endl;
+            node_dis.ShowLayout();
+            std::cout << "choose following cluster to place second stripe in order : " << std::endl;
+            std::for_each(clusterindex.cbegin(),clusterindex.cend(),
+            [](int i){ std::cout << i <<" ";});
+            std::cout << std::endl;
+
+            std::cout <<"then the minimum type_I and type_II cost are : " <<std::endl;
+            std::cout << type_I_cost <<" and " <<type_II_cost << std::endl;
+            //
             transition_cost_I_II.emplace_back(std::make_pair(type_I_cost, type_II_cost)); //this is the minimum for this randomly chosen clusters
         } while (std::next_permutation(clusterindex.begin(), clusterindex.end()));
         std::tie(clusterindex, flag) = comb.Generate();
