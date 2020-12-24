@@ -1,0 +1,6 @@
+/.vscode
+/build
+/CMakeCache.txt
+/CMakeFiles
+/CMakeLists.txt
+/Testing
