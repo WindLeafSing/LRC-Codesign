@@ -35,18 +35,21 @@ int main(int, char **)
     std::cin >> k >> l >> g >> c;
     assert(k%l==0);
     assert(k/l==g);
+    
     node_dispatcher node_dis(k, l, g, c);
     int required_local_cluster = node_dis.GetLocalClusterNum();
     int required_residue_cluster = node_dis.GetResidueClusterNum();
     int required_global_cluster = node_dis.GetGlobalClusterNum();
     node_dis.ShowLayout();
-
+    assert(c>=2*(required_local_cluster + required_residue_cluster + required_global_cluster)-1);
     auto localmap = node_dis.GetLocalClusterInfo();
     auto residuemap = node_dis.GetResidueClusterInfo();
     auto globalmap = node_dis.GetGlobalClusterInfo();
 
     //since considering c = 2*required_cluster_num is enough
-    c = std::min(c, 2 * (required_local_cluster + required_residue_cluster + required_global_cluster));
+    c = std::min(c, 2 * (required_local_cluster + 
+                         required_residue_cluster +
+                         required_global_cluster));
 
     //suppose existed stripe (0,1,2,...,n) where global cluster is n
     std::vector<std::vector<std::pair<int, int>>> cost(2 /* 2 stripe */, std::vector<std::pair<int, int>>(c, {0, 0}));
