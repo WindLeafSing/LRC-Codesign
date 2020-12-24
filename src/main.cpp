@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "../include/combination_generator.h"
 #include "../include/placement_strategy.h"
 #include "../include/common.h"
@@ -83,13 +84,15 @@ int main(int, char **)
         cost[0][start++] = {0, globalmap[i].size()};
     }
 
-    std::vector<std::pair<int, int>> transition_cost_I_II;
-
+    std::fstream fs("simulation_result",std::ios::out);
+    fs<<"for fixed first stripe layout\n";
+    fs<<"given second stripe layout and following its minimum typeI typeII costs:\n";
+    fs.flush();
     //random distributed second stripe
     //generate random cluster index , last one is global cluster
-    auto [clusterindex, flag] = comb.Generate();
     do
     {
+        auto [clusterindex, flag] = comb.Generate();
         std::sort(clusterindex.begin(), clusterindex.end());
         do
         {
@@ -147,14 +150,19 @@ int main(int, char **)
             node_dis.ShowLayout();
             std::cout << "choose following cluster to place second stripe in order : " << std::endl;
             std::for_each(clusterindex.cbegin(),clusterindex.cend(),
-            [](int i){ std::cout << i <<" ";});
+            [&fs](int i){ std::cout << i <<" "; fs << i <<" ";});
             std::cout << std::endl;
+            fs<<"\n";
 
             std::cout <<"then the minimum type_I and type_II cost are : " <<std::endl;
             std::cout << type_I_cost <<" and " <<type_II_cost << std::endl;
             //
-            transition_cost_I_II.emplace_back(std::make_pair(type_I_cost, type_II_cost)); //this is the minimum for this randomly chosen clusters
+           
+            // transition_cost_I_II.emplace_back(std::make_pair(type_I_cost, type_II_cost)); //this is the minimum for this randomly chosen clusters
+            
+            fs<<type_I_cost<<"-"<<type_II_cost<<"\n";
+            fs.flush();
         } while (std::next_permutation(clusterindex.begin(), clusterindex.end()));
-        std::tie(clusterindex, flag) = comb.Generate();
-    } while (!comb.IsRolling());
+        if(flag) break;
+    } while (true);
 }
