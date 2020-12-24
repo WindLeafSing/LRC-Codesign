@@ -26,6 +26,7 @@ int main(int, char **)
         std::cin >> k >> l >> g >> c;
         node_dispatcher node_dis(k, l, g, c);
         node_dis.ShowLayout();
+        //
     }
 
 
