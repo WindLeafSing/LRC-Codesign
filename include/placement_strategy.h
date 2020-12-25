@@ -193,31 +193,31 @@ public:
                                                                 globalPnode.end())));
     }
 
-    void ShowLayout() const
+    void ShowLayout(std::ostream & os = std::cout) const
     {
 
-        std::cout << "Local Cluster Mapping :" << std::endl;
+        os << "Local Cluster Mapping : \n" ;
         for (const auto &p : LocalClusterMap)
         {
-            std::cout << "Type-I Cluster " << p.first << " : \n";
-            std::for_each(p.second.cbegin(), p.second.cend(), [](int e) { std::cout << e << " "; });
-            std::cout << std::endl;
+            os << "Type-I Cluster " << p.first << " : \n";
+            std::for_each(p.second.cbegin(), p.second.cend(), [&os](int e) { os << e << " "; });
+            os << "\n";
         }
 
-        std::cout << "Residue Cluster Mapping :" << std::endl;
+        os << "Residue Cluster Mapping : \n";
         for (const auto &p : ResidueClusterMap)
         {
-            std::cout << "Type-II Cluster " << p.first << " : \n";
-            std::for_each(p.second.cbegin(), p.second.cend(), [](int e) { std::cout << e << " "; });
-            std::cout << std::endl;
+            os << "Type-II Cluster " << p.first << " : \n";
+            std::for_each(p.second.cbegin(), p.second.cend(), [&os](int e) { os << e << " "; });
+           os << "\n";
         }
 
-        std::cout << "Global Cluster Mapping :" << std::endl;
+        os << "Global Cluster Mapping : \n " ;
         for (const auto &p : GlobalClusterMap)
         {
-            std::cout << "Type-III Cluster " << p.first << " : \n";
-            std::for_each(p.second.cbegin(), p.second.cend(), [](int e) { std::cout << e << " "; });
-            std::cout << std::endl;
+            os << "Type-III Cluster " << p.first << " : \n";
+            std::for_each(p.second.cbegin(), p.second.cend(), [&os](int e) { os << e << " "; });
+            os << "\n";
         }
     }
 

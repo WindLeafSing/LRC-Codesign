@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <string>
 #include "../include/combination_generator.h"
 #include "../include/placement_strategy.h"
 #include "../include/common.h"
@@ -88,8 +89,9 @@ int main(int, char **)
     }
 
     int max_datanode_per_cluster = *std::max_element(datanode_distribution.cbegin(),datanode_distribution.cend());
-    std::fstream fs("simulation_result",std::ios::out);
+    std::fstream fs(std::string(std::to_string(k)).append("-").append(std::to_string(l)).append("-").append(std::to_string(g)).append("-").append(std::to_string(c)),std::ios::out);
     fs<<"for fixed first stripe layout\n";
+    node_dis.ShowLayout(fs);
     fs<<"given second stripe layout and following its typeII costs:\n";
     fs.flush();
     //random distributed second stripe
@@ -111,7 +113,7 @@ int main(int, char **)
             int index = 0;
             for (int i = 0; i < required_local_cluster; ++i)
             {
-                if (clusterindex[index] < required_local_cluster + required_residue_cluster && (cost[0][clusterindex[index]].first + cost[0][clusterindex[index]].second) != 0)
+                if ((clusterindex[index] < required_local_cluster + required_residue_cluster) && (cost[0][clusterindex[index]].first + cost[0][clusterindex[index]].second) != 0)
                 {
                     //this cluster second stripe located need a migration
                     type_II_migration_num += localmap[i].size();
@@ -124,7 +126,7 @@ int main(int, char **)
 
             for (int i = 0; i < required_residue_cluster; ++i)
             {
-                if (clusterindex[index] < required_residue_cluster + required_local_cluster && (cost[0][clusterindex[index]].first + cost[0][clusterindex[index]].second) != 0)
+                if ((clusterindex[index] < required_residue_cluster + required_local_cluster) && (cost[0][clusterindex[index]].first + cost[0][clusterindex[index]].second) != 0)
                 {
                     //this cluster second stripe located need a migration
                     type_II_migration_num += residuemap[i].size();
