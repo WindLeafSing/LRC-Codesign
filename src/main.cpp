@@ -71,24 +71,35 @@ int main(int, char **)
     //randomly distributed into c clusters
     std::default_random_engine dre(42);
     std::uniform_real_distribution<double> uid(0.0,1.0);
+    std::vector<int> index(required_local_cluster+required_residue_cluster+required_global_cluster,-1);
+    bool rollingflag=false;
     for(int i=0;i<stripe_num;++i)
     {
-        auto [index,rollingflag] = comb.Generate();
+        std::tie(index,rollingflag) = comb.Generate();
         shuffle_helper(index);
+        std::cout << "after  shuffle  :";
+        std::for_each(index.cbegin(),index.cend(),[](int i ){std::cout<< i <<" ";});
+        std::cout <<  std::endl;
         //index[0] = i -> put c0 into cluser-i
+        
         for(int j=0;j<index.size();++j)
         {
             cluster_layout[i][index[j]]=j;
-            std::cout << cluster_layout[i][index[j]]<<" ";
         }
-        std::cout << std::endl;
     }
 
 
-/*
-  debug display cluster layout
-    
-*/
+
+//  debug display cluster layout
+    for(const auto &v: cluster_layout)
+    {
+        for(auto i:v)
+        {
+            std::cout << i << " " ;
+        }
+        std::cout << std::endl;
+    }    
+
     int start = 0;
     for (int i = 0; i < required_local_cluster; ++i)
     {
