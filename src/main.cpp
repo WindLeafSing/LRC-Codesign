@@ -130,7 +130,7 @@ int main(int, char **)
     int max_datanode_per_cluster = (*std::max_element(datanode_distribution.cbegin(), datanode_distribution.cend(),
                                                       [](std::pair<int, int> p1, std::pair<int, int> p2) { return p1.first < p2.first; }))
                                        .first;
-    std::fstream fs(std::string(std::to_string(k)).append("-").append(std::to_string(l)).append("-").append(std::to_string(g)).append("-").append(std::to_string(c)), std::ios::out);
+    std::fstream fs(std::string(std::to_string(k)).append("-").append(std::to_string(l)).append("-").append(std::to_string(g)).append("-").append(std::to_string(c)), std::ios::out|std::ios::in|std::ios::trunc);
     node_dis.ShowLayout(fs);
     fs.flush();
     //random distributed second stripe
@@ -209,6 +209,14 @@ int main(int, char **)
         }
     }
 
+    
+    //display cost
+    fs << "To reconstruct global parity in a naive way, " << type_I_cost << " blocks "
+        <<"will be retrived\n";
+    fs << "To maintain single cluster failure tolerance, at lease "<<type_II_cost[0] << " blocks "
+        <<"will be migrated\n";
+    
+    
     /*
     do
     {
