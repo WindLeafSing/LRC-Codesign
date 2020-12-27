@@ -47,17 +47,48 @@ int main(int, char **)
     auto residuemap = node_dis.GetResidueClusterInfo();
     auto globalmap = node_dis.GetGlobalClusterInfo();
 
-    //since considering c = 2*required_cluster_num is enough
-    c = std::min(c, 2 * (required_local_cluster + 
-                         required_residue_cluster +
-                         required_global_cluster));
+
+    // 10 stripes
+    int stripe_num = 10;
+
+    std::vector<std::vector<int>> cluster_layout(stripe_num,std::vector<int>(c,-1));
+    /*
+    
+     0   1   2   3   4   5   6   ...   c-1
+     0  c1  c2  c3   0   0   c4  ...    0
+     c2  0  c1  c4   0   0   c3  ...    0
+     ...
+
+    */ 
+
 
     //suppose existed stripe (0,1,2,...,n) where global cluster is n
-    std::vector<std::vector<std::pair<int, int>>> cost(2 /* 2 stripe */, std::vector<std::pair<int, int>>(c, {0, 0}));
     combination_generator comb(0, c - 1, required_local_cluster + required_residue_cluster + required_global_cluster);
 
     //fill in first stripe and calculate datanodenum and paritynodenum per cluster
-    std::vector<int> datanode_distribution(required_local_cluster + required_residue_cluster, 0);
+    std::vector<std::pair<int,int>> datanode_distribution(required_local_cluster + required_residue_cluster, {0,0});
+
+    //randomly distributed into c clusters
+    std::default_random_engine dre(42);
+    std::uniform_real_distribution<double> uid(0.0,1.0);
+    for(int i=0;i<stripe_num;++i)
+    {
+        auto [index,rollingflag] = comb.Generate();
+        shuffle_helper(index);
+        //index[0] = i -> put c0 into cluser-i
+        for(int j=0;j<index.size();++j)
+        {
+            cluster_layout[i][index[j]]=j;
+            std::cout << cluster_layout[i][index[j]]<<" ";
+        }
+        std::cout << std::endl;
+    }
+
+
+/*
+  debug display cluster layout
+    
+*/
     int start = 0;
     for (int i = 0; i < required_local_cluster; ++i)
     {
@@ -67,8 +98,7 @@ int main(int, char **)
             if (e < k)
                 datanode_num++;
         }
-        datanode_distribution[start] = datanode_num;
-        cost[0][start++] = {datanode_num, localmap[i].size() - datanode_num};
+        datanode_distribution[start++] = {datanode_num,localmap[i].size() - datanode_num};
     }
 
     for (int i = 0; i < required_residue_cluster; ++i)
@@ -79,16 +109,18 @@ int main(int, char **)
             if (e < k)
                 datanode_num++;
         }
-        datanode_distribution[start] = datanode_num;
-        cost[0][start++] = {datanode_num, residuemap[i].size() - datanode_num};
+        datanode_distribution[start++] = {datanode_num, residuemap[i].size() - datanode_num};
     }
 
     for (int i = 0; i < required_global_cluster; ++i)
     {
-        cost[0][start++] = {0, globalmap[i].size()};
+        datanode_distribution[start++] = {0, globalmap[i].size()};
     }
 
-    int max_datanode_per_cluster = *std::max_element(datanode_distribution.cbegin(),datanode_distribution.cend());
+    //random shuffle the "template" vector
+
+    int max_datanode_per_cluster = (*std::max_element(datanode_distribution.cbegin(),datanode_distribution.cend(),
+    [](std::pair<int,int> p1,std::pair<int,int> p2){ return p1.first<p2.first;})).first;
     std::fstream fs(std::string(std::to_string(k)).append("-").append(std::to_string(l)).append("-").append(std::to_string(g)).append("-").append(std::to_string(c)),std::ios::out);
     fs<<"for fixed first stripe layout\n";
     node_dis.ShowLayout(fs);
@@ -96,6 +128,7 @@ int main(int, char **)
     fs.flush();
     //random distributed second stripe
     //generate random cluster index , last one is global cluster
+/*
     do
     {
         auto [clusterindex, flag] = comb.Generate();
@@ -167,4 +200,6 @@ int main(int, char **)
         } while (std::next_permutation(clusterindex.begin(), clusterindex.end()));
         if(flag) break;
     } while (true);
+*/
+    return 0;
 }
